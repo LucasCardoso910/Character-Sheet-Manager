@@ -3,8 +3,8 @@ An easy way to create D&D character sheets!
 
 ### What is Character Sheet Manager?
 D&D is a fun game. It allows you to create all sorts of characters with no
-limits but your imagination. And now, creating a new character is even easier
-with Character Sheet Manager.
+limits but your imagination. Now, creating a new character is even easier with
+Character Sheet Manager.
 Although you can create anything in D&D, it can be quite a boring and
 mechanical task. The Character Sheet Manager fits in this particular space.
 You will no longer need to go page to page in the Player's Handbook, copying
@@ -42,15 +42,14 @@ sessions' game.
 
 ### How to use it?
 This is an extremely initial version of my idea, as I describe all the things
-I still want to do in it right below. But, even though it is not at its
+I still want to do in it right below. Even though it is not at its
 maximum yet, the program is usable. For now, the way to execute the program
 is by downloading the files from GitHub. In the terminal, setting the working
 directory to the folder where the files are and typing "python3 main.py". 
 
 ### What it will do in the future?
 This is a beginning project. I have plannings to expand it way far from its
-current state. Some of the new features that I intend to add in the future
-are:
+current state. Some new features that I intend to add in the future are:
 1. An User Graphic Interface.
 2. Automatically fill the sheet pdf.
 3. Accept multi-class characters.
@@ -68,7 +67,7 @@ my biggest project so far and my first real program in Python. I am starting
 in this programming world and just really wanted to try new things and to put
 into practice my learnings so far.
 I know that this program may have several errors, bugs, and more efficient
-ways to do what it does. And if, by any chance, you are reading this code and
-want to help, to correct something, or show me a better way to code, feel
-completely free and appreciated for it. I just feel the need to start doing
+ways to do what it does. If, by any chance, you are reading this code and want
+to help, to correct something, or show me a better way to code, feel completely
+free and appreciated for it. I just feel the need to start doing
 something and building real programs.

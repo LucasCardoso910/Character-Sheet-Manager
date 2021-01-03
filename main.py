@@ -12,5 +12,6 @@ from functions import *
 #       in-program dice
 # TODO: A function that checks if the character sheet is adequate (e.g. if the
 #       user did not leave the program before finishing some adjustment
+# TODO: Proper documentation
 
 menu()

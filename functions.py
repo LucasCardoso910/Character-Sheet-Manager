@@ -1,4 +1,5 @@
 from variables import *
+from basic_functions import *
 from pathlib import Path
 import pickle
 import copy
@@ -218,8 +219,8 @@ def buy_equipment(starting_wealth, fixed_price=True):
                     key = f'{name:27s}' \
                           f'Cost (gp): {str(item.cost):18s}' \
                           f'Weight (lb.): {item.weight:2.2f}' \
- \
-                            options[key] = item
+
+                options[key] = item
                 selection_number += 1
 
             selected = select(
@@ -1395,8 +1396,8 @@ def show_character(character):
 
                 if go_on:
                     spells_list = []
-                    for level, level_spells in character.magical_ability.spells \
-                            .items():
+                    for level, level_spells in character.magical_ability \
+                            .spells.items():
                         spells_list += level_spells
 
                     if len(spells_list) \
@@ -1438,7 +1439,7 @@ def show_character(character):
                             print('')
                     elif character.magical_ability.spells_known == -1:
                         for level, spells in index['SPELLS'][
-                            character.general_info['CLASS']].items():
+                                character.general_info['CLASS']].items():
                             if level == 1:
                                 ordinal = 'st'
                             elif level == 2:
@@ -2336,8 +2337,8 @@ def select_skills(
     if cont:
         classe.skills_proficiency = classe_skills_proficiency
         all_skills = race.skills_proficiency \
-                     + classe.skills_proficiency \
-                     + background.skills
+            + classe.skills_proficiency \
+            + background.skills
 
     return all_skills
 
@@ -3298,7 +3299,7 @@ def equip_armor(character):
             if armor == character.equipments['ARMOR EQUIPPED']:
                 pass
             elif character.equipments[
-                'SHIELD EQUIPPED'] and armor.name == 'SHIELD':
+                    'SHIELD EQUIPPED'] and armor.name == 'SHIELD':
                 pass
             else:
                 armors[armor.name] = armor
@@ -3331,8 +3332,8 @@ def equip_armor(character):
             text += 'The shield adds 2 to your general Armor Class.\n'
 
         text += '\nSelect an armor to equip in your character.\n'
-        text += 'Be aware that, doing that, you will be replacing your current' \
-                ' armor, if there is one\n'
+        text += 'Be aware that, doing that, you will be replacing your ' \
+                'current armor, if there is one\n'
 
         answer = select(
             options=armors,
@@ -3357,7 +3358,7 @@ def equip_armor(character):
 
             clear_terminal()
             character.general_stats['AC'] = 10 \
-                                            + character.abilities.score('DEX')
+                + character.abilities.score('DEX')
             print(f'Dex mod: {character.abilities.score("DEX")}')
             print(f'AC: {character.general_stats["AC"]}')
 
@@ -3787,7 +3788,7 @@ def routine_preparation():
 
 def level_up(character):
     if character.general_info['XP'] >= character.xp_by_level[
-        character.general_info['LEVEL'] + 1]:
+            character.general_info['LEVEL'] + 1]:
         character.general_info['LEVEL'] += 1
 
         if character.general_info['LEVEL'] in [4, 8, 12, 16, 19]:
@@ -3896,8 +3897,8 @@ def level_up(character):
                     character.general_info['LEVEL']
                 ]
 
-            character.magical_ability.spells_known += character.magical_ability \
-                .spells_by_level[character.general_info['LEVEL']]
+            character.magical_ability.spells_known += character. \
+                magical_ability.spells_by_level[character.general_info['LEVEL']]
 
             character.magical_ability.spell_slots = character.magical_ability. \
                 spell_slots_by_level[character.general_info['LEVEL']]
