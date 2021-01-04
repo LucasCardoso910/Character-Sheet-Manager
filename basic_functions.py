@@ -570,3 +570,12 @@ def get_a_number(prompt=None, go_back_message=None):
 
             if end:
                 return None
+
+
+def set_string_size(string, size):
+    new_string = string[:size]
+
+    for _ in range(len(new_string), size):
+        new_string += ' '
+
+    return new_string
