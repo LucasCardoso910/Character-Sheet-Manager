@@ -1327,12 +1327,12 @@ def show_character(character):
                 'Hair Color      Height      Weight'
             )
             print(
-                f'{character.personal_info["AGE"].strip().split(" ")[0]:9s}'
-                f'{character.personal_info["EYE"]:15s}'
-                f'{character.personal_info["SKIN"]:16s}'
-                f'{character.personal_info["HAIR"]:16s}'
-                f'{character.personal_info["HEIGHT"]:12s}'
-                f'{character.personal_info["WEIGHT"]}'
+                f'{set_string_size(character.personal_info["AGE"], 9)}'
+                f'{set_string_size(character.personal_info["EYE"], 15)}'
+                f'{set_string_size(character.personal_info["SKIN"], 16)}'
+                f'{set_string_size(character.personal_info["HAIR"], 16)}'
+                f'{set_string_size(character.personal_info["HEIGHT"], 12)}'
+                f'{set_string_size(character.personal_info["WEIGHT"], 12)}'
                 f'\n'
             )
 
@@ -2851,23 +2851,19 @@ def show_sheets():
             info = ' ' + name + '  '
 
             race = file_object.readline()[:-1]
-            race = f'{race:.18s}'  # Max length of 10 characters
-            race = f'{race:18s}'  # Must occupy 10 characters
+            race = set_string_size(race, 18)
             info += race + '  '
 
             classe = file_object.readline()[:-1]
-            classe = f'{classe:.9s}'  # Max length of 9 characters
-            classe = f'{classe:9s}'  # Must occupy 9 characters
+            classe = set_string_size(classe, 9)
             info += classe + '  '
 
             level = file_object.readline()[:-1]
-            level = f'{level:.2s}'  # Max length of 2 characters
-            level = f'{level:2s}'  # Must occupy 2 characters
+            level = set_string_size(level, 2)
             info += level + '  '
 
             background = file_object.readline()[:-1]
-            background = f'{background:.13s}'  # Max length of 13 characters
-            background = f'{background:13s}'  # Must occupy 13 characters
+            background = set_string_size(background, 13)
             info += background
 
             files_info[info] = key
