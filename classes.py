@@ -653,6 +653,7 @@ class Barbarian(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth,
     ):
         super().__init__(
             name='BARBARIAN',
@@ -709,7 +710,7 @@ class Barbarian(Class):
                     14: [{'TOTEMIC ATTUNEMENT': ['BEAR', 'EAGLE', 'WOLF']}],
                 },
             },
-            starting_wealth=10 * Dice(number=2, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities()
         )
 
@@ -804,6 +805,7 @@ class Bard(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -831,7 +833,7 @@ class Bard(Class):
             equipment_options=equipment_options,
             equipment=equipment,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             number_tools=3,
             tools_options=[
                 'BAGPIPES', 'DRUM', 'DULCIMER', 'FLUTE', 'LUTE',
@@ -972,6 +974,7 @@ class Cleric(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth,
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -992,7 +995,7 @@ class Cleric(Class):
             equipment_options=equipment_options,
             equipment=equipment,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='WIS',
@@ -1105,6 +1108,7 @@ class Druid(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -1131,7 +1135,7 @@ class Druid(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=2, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='WIS',
@@ -1242,6 +1246,7 @@ class Fighter(Class):
             abilities,
             level,
             equipment_options,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -1263,7 +1268,7 @@ class Fighter(Class):
             equipment_options=equipment_options,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=False,
                 magical_ability='INT',
@@ -1329,6 +1334,7 @@ class Monk(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -1361,7 +1367,7 @@ class Monk(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities()
         )
 
@@ -1457,6 +1463,7 @@ class Paladin(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -1479,7 +1486,7 @@ class Paladin(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='CHA',
@@ -1584,6 +1591,7 @@ class Ranger(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[1]
 
@@ -1606,7 +1614,7 @@ class Ranger(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=5, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=False,
                 magical_ability='WIS',
@@ -1702,6 +1710,7 @@ class Rogue(Class):
             level,
             equipment_options,
             equipment,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[level]
 
@@ -1732,7 +1741,7 @@ class Rogue(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=4, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=False,
                 magical_ability='INT',
@@ -1836,6 +1845,7 @@ class Sorcerer(Class):
             level,
             equipment,
             equipment_options,
+            starting_wealth
     ):
         specialization_level = 1
         proficiency = super().proficiency_by_level[level]
@@ -1860,7 +1870,7 @@ class Sorcerer(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=3, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='CHA',
@@ -1956,6 +1966,7 @@ class Warlock(Class):
             level,
             equipment,
             equipment_options,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[level]
 
@@ -1978,7 +1989,7 @@ class Warlock(Class):
             equipment_options=equipment_options,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=4, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='CHA',
@@ -2113,6 +2124,7 @@ class Wizard(Class):
             level,
             equipment,
             equipment_options,
+            starting_wealth
     ):
         proficiency = super().proficiency_by_level[level]
 
@@ -2140,7 +2152,7 @@ class Wizard(Class):
             equipment=equipment,
             specialization=None,
             specializations_features=self.specializations_features,
-            starting_wealth=10 * Dice(number=4, maximum=4).roll(),
+            starting_wealth=starting_wealth,
             magical_ability=MagicAbilities(
                 has_magic=True,
                 magical_ability='INT',

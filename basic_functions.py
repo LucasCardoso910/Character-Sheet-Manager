@@ -1,4 +1,5 @@
 from math import ceil
+from pathlib import Path
 import os
 
 
@@ -23,6 +24,41 @@ def convert_dice_to_d_format(dice):
     string = str(dice.number) + 'd' + str(dice.max)
 
     return string
+
+
+def get_typed_dice(dice, objective=None, times=1):
+    typed = []
+
+    clear_terminal()
+    for _ in range(times):
+        value = None
+        while value is None:
+            if len(typed) > 0:
+                print(f'You typed so far: {typed}.\n')
+
+            if objective:
+                print(f'Roll a {convert_dice_to_d_format(dice)} to {objective}')
+            else:
+                print(f'Roll a {convert_dice_to_d_format(dice)}.')
+            print('\nType the value rolled.')
+            number = get_a_number()
+
+            if dice.number <= number <= dice.max * dice.number:
+                value = number
+            else:
+                print(f'A {convert_dice_to_d_format(dice)} only rolls a number '
+                      f'between {dice.number} and {dice.max * dice.number}.')
+                print('Press ENTER to try again...')
+                input()
+
+            clear_terminal()
+
+        typed.append(value)
+
+    if len(typed) == 1:
+        typed = typed[0]
+
+    return typed
 
 
 def list_with_no_list_or_dict(a_list):
@@ -541,14 +577,13 @@ def get_a_number(prompt=None, go_back_message=None):
     end = False
     while not end:
         if prompt:
+            clear_terminal()
             print(prompt)
 
             if go_back_message is None:
                 go_back_message = True
-
-        if go_back_message:
-            print("If you want to go back, just "
-                  "type anything that's not a number.")
+                print('If you want to go back, just type anything that\'s '
+                      'not a number.')
 
         number = input()
 
@@ -579,3 +614,7 @@ def set_string_size(string, size):
         new_string += ' '
 
     return new_string
+
+
+def get_parent():
+    return Path(__file__).absolute().parent

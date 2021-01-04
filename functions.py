@@ -1,8 +1,12 @@
 from variables import *
 from basic_functions import *
-from pathlib import Path
 import pickle
 import copy
+
+
+config = {
+    'DICE ROLL': 'VIRTUAL'
+}
 
 
 def choose_equipment(equipment_options, number_elements=1):
@@ -471,7 +475,18 @@ def random_trinket():
         ),
         Trinket('Metal urn containing the ashes of a hero'),
     ]
-    number = randint(1, len(trinkets)) - 1
+
+    d100 = Dice(maximum=100)
+
+    if config['DICE ROLL'] == 'VIRTUAL':
+        number = d100.roll()
+    else:  # config['DICE ROLL'] == 'PHYSICAL'
+        number = get_typed_dice(
+            dice=d100,
+            objective='define your random trinket.'
+        )
+
+    number -= 1
 
     print(f'You won a trinket: {trinkets[number].name}')
     print('Press ENTER to continue')
@@ -598,12 +613,22 @@ def create_class(classe, level, abilities):
             javelin,
             javelin
         ]
+        wealth_dice = Dice(number=2, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Barbarian(
             level=level,
             equipment_options=equipment_options,
             equipment=chosen_equipment,
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'BARD':
         equipment_options = [
             [
@@ -619,13 +644,23 @@ def create_class(classe, level, abilities):
                 index['EQUIPMENT']['TOOLS']['MUSICAL INSTRUMENT']
             ],
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Bard(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[leather_armor, dagger],
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'CLERIC':
         equipment_options = [
             [
@@ -648,13 +683,23 @@ def create_class(classe, level, abilities):
                 index['EQUIPMENT']['ADVENTURING GEAR']['HOLY SYMBOL']
             ]
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Cleric(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[shield],
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'DRUID':
         equipment_options = [
             [
@@ -669,13 +714,23 @@ def create_class(classe, level, abilities):
                 index['EQUIPMENT']['ADVENTURING GEAR']['DRUIDIC FOCUS']
             ]
         ]
+        wealth_dice = Dice(number=2, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Druid(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[leather_armor, packs['EXPLORER']],
+            starting_wealth=starting_wealth,
         )
+
     elif classe == 'FIGHTER':
         equipment_options = [
             [
@@ -708,12 +763,22 @@ def create_class(classe, level, abilities):
                 tuple(packs['EXPLORER'])
             ]
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Fighter(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'MONK':
         equipment_options = [
             [
@@ -728,12 +793,22 @@ def create_class(classe, level, abilities):
         chosen_equipment = [
             dart, dart, dart, dart, dart, dart, dart, dart, dart, dart
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Monk(
             level=level,
             equipment_options=equipment_options,
             equipment=chosen_equipment,
+            starting_wealth=starting_wealth,
         )
+
     elif classe == 'PALADIN':
         equipment_options = [
             [
@@ -763,13 +838,23 @@ def create_class(classe, level, abilities):
                 index['EQUIPMENT']['ADVENTURING GEAR']['HOLY SYMBOL']
             ]
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Paladin(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[chain_mail_armor],
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'RANGER':
         print('Choose two simple melee weapons to be offered to you later:')
         equipment_options = [
@@ -796,13 +881,23 @@ def create_class(classe, level, abilities):
                 tuple(packs['EXPLORER'])
             ],
         ]
+        wealth_dice = Dice(number=5, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Ranger(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[longbow],
+            starting_wealth=starting_wealth,
         )
+
     elif classe == 'ROGUE':
         equipment_options = [
             [
@@ -825,13 +920,23 @@ def create_class(classe, level, abilities):
             dagger,
             thieves_kit
         ]
+        wealth_dice = Dice(number=4, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Rogue(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=chosen_equipment,
+            starting_wealth=starting_wealth,
         )
+
     elif classe == 'SORCERER':
         equipment_options = [
             [
@@ -846,13 +951,23 @@ def create_class(classe, level, abilities):
                 tuple(packs['EXPLORER'])
             ],
         ]
+        wealth_dice = Dice(number=3, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Sorcerer(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[dagger, dagger],
+            starting_wealth=starting_wealth
         )
+
     elif classe == 'WARLOCK':
         equipment_options = [
             [
@@ -870,13 +985,23 @@ def create_class(classe, level, abilities):
                 index['EQUIPMENT']['WEAPON']['SIMPLE']
             ],
         ]
+        wealth_dice = Dice(number=4, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Warlock(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[leather_armor, dagger, dagger],
+            starting_wealth=starting_wealth,
         )
+
     elif classe == 'WIZARD':
         equipment_options = [
             [
@@ -892,12 +1017,21 @@ def create_class(classe, level, abilities):
                 tuple(packs['EXPLORER'])
             ],
         ]
+        wealth_dice = Dice(number=4, maximum=4)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            starting_wealth = 10 * wealth_dice.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            starting_wealth = 10 * get_typed_dice(
+                dice=wealth_dice,
+                objective='define your starting wealth.'
+            )
 
         classe = Wizard(
             abilities=abilities,
             level=level,
             equipment_options=equipment_options,
             equipment=[spellbook],
+            starting_wealth=starting_wealth
         )
 
     classe.features = create_simple_list(classe.features)
@@ -1241,11 +1375,13 @@ def show_character(character):
                 print_name('Mounts and Vehicles')
                 for mount in mounts:
                     print(f'- {mount.name.title()}')
+                print('\n')
 
             if trinkets:
                 print_name('Trinkets')
                 for trinket in trinkets:
                     print(f'- {trinket.name.title()}')
+                print('\n')
 
             print_name('WEIGHT')
             print(f'Total weight carried: {character.equipments["WEIGHT"]}')
@@ -1922,7 +2058,22 @@ def create_abilities(classe, race, abilities=None):
                 values = get_existing_abilities_values(
                     abilities, race.ability_increase)
             elif answer == 'GENERATE RANDOM VALUES':
-                values = generate_random_values()
+                if config['DICE ROLL'] == 'VIRTUAL':
+                    values = generate_random_values()
+                else:  # config['DICE ROLL'] == 'PHYSICAL'
+                    print('In your configurations, you selected '
+                          'to roll a physical dice.')
+                    print('To you abilities, you must roll a 4d6 '
+                          'and discard the lesser value.')
+                    print('Type the sum of the other 3 as a single value.')
+                    print("NOTE: The order doesn't matter just yet.\n")
+                    print('Press ENTER to start typing your values...')
+                    input()
+
+                    values = get_typed_dice(
+                        dice=Dice(number=3, maximum=6),
+                        times=6
+                    )
             elif answer == 'USE DEFAULT VALUES':
                 values = [15, 14, 13, 12, 10, 8]
 
@@ -2411,6 +2562,8 @@ def select_equipment(classe, background):
                 equipments = 'EXIT'
 
         if end and equipments != 'EXIT' and equipment_bought != 'GO BACK':
+            equipments.append(random_trinket())
+
             equipments = create_simple_list(equipments)
             equipments = group_equipment(equipments)
 
@@ -2418,56 +2571,48 @@ def select_equipment(classe, background):
 
 
 def loop_through_functions(variables, functions_order):
-    end = False
-    all_defined = True
     last_choice = None
     function_number = 0
-    while not end:
-        try:
-            function_info = functions_order[function_number]
-            variable_key = function_info[0]
-            function = function_info[1]
-            parameters_keys = function_info[2]
-            asks_user = function_info[3]
 
-            parameters = []
-            for key in parameters_keys:
-                parameters.append(variables[key])
+    while function_number < len(functions_order):
+        function_info = functions_order[function_number]
+        variable_key = function_info[0]
+        function = function_info[1]
+        parameters_keys = function_info[2]
+        asks_user = function_info[3]
 
-            result = function(*parameters)
+        parameters = []
+        for key in parameters_keys:
+            parameters.append(variables[key])
 
-            if last_choice == 'GO BACK' \
-                    and ((asks_user == 'SOMETIMES' and result is None)
-                         or asks_user == 'NEVER'):
+        result = function(*parameters)
+
+        if last_choice == 'GO BACK' \
+                and ((asks_user == 'SOMETIMES' and result is None)
+                     or asks_user == 'NEVER'):
+            if function_number != 0:
+                function_number -= 1
+            else:
+                return False
+        else:
+            last_choice = result
+
+            if result not in ['GO BACK', 'EXIT']:
+                function_number += 1
+                variables[variable_key] = result
+            elif result is None:
+                raise Exception(f'{variable_key} = None.')
+            elif result == 'GO BACK':
                 if function_number != 0:
                     function_number -= 1
                 else:
-                    all_defined = False
-                    end = True
-            else:
-                last_choice = result
+                    variables[variable_key] = 'GO BACK'
+                    return False
+            elif result == 'EXIT':
+                variables[variable_key] = 'EXIT'
+                return False
 
-                if result not in ['GO BACK', 'EXIT']:
-                    function_number += 1
-                    variables[variable_key] = result
-                elif result is None:
-                    raise Exception(f'{variable_key} = None.')
-                elif result == 'GO BACK':
-                    if function_number != 0:
-                        function_number -= 1
-                    else:
-                        all_defined = False
-                        variables[variable_key] = 'GO BACK'
-                        end = True
-                elif result == 'EXIT':
-                    all_defined = False
-                    variables[variable_key] = 'EXIT'
-                    end = True
-
-        except IndexError:
-            end = True
-
-    return all_defined
+    return True
 
 
 def select_background_speciality(background, ):
@@ -2752,10 +2897,13 @@ def create_new_character():
 
 def check_files():
     """
-    Check if the necessary folder with the saved sheets is in order
+    Check if the necessary folder with the saved sheets and config is in order
     :return: the path of the folder of the sheets
     """
-    parent = Path(__file__).absolute().parent
+    global config
+    parent = get_parent()
+
+    # Check sheets
     sheets_folder = parent.joinpath('Files/Sheets')
     index_file = sheets_folder.joinpath('index.txt')
 
@@ -2778,11 +2926,21 @@ def check_files():
                 file.write(str(character.general_info['LEVEL']) + '\n')
                 file.write(character.general_info['BACKGROUND'] + '\n')
 
-    return sheets_folder
+    # Check configurations
+    config_folder = parent.joinpath('Files')
+    config_file = config_folder.joinpath('config.txt')
+
+    if not config_file.exists():
+        config_file.touch()
+
+        with open(config_file, 'wb') as new_file:
+            pickle.dump(config, new_file)
+
+    return parent
 
 
 def save_sheet(character):
-    folder = check_files()
+    folder = check_files().joinpath('Files/Sheets')
     path = folder.joinpath(character.personal_info["CHARACTER'S NAME"] + '.txt')
     exists = path.exists()
 
@@ -2807,7 +2965,7 @@ def show_sheets():
     to choose.
     :return: dictionary with the number associated with all the sheets
     """
-    folder = check_files()
+    folder = check_files().joinpath('Files/Sheets')
     sheets_index = folder.joinpath('index.txt')
     sheets_path = {}
     number_sheets = len(get_children(folder)) - 1
@@ -2874,8 +3032,7 @@ def show_sheets():
 
 
 def delete_sheet(sheet):
-
-    folder = check_files()
+    folder = check_files().joinpath('Files/Sheets')
     index_path = folder.joinpath('index.txt')
     string_path = sheet.as_posix()
 
@@ -3341,21 +3498,14 @@ def equip_armor(character):
             clear_terminal()
             character.general_stats['AC'] = 10 \
                 + character.abilities.score('DEX')
-            print(f'Dex mod: {character.abilities.score("DEX")}')
-            print(f'AC: {character.general_stats["AC"]}')
 
             if character.equipments['SHIELD EQUIPPED'] is True:
-                print(f'Shield: {shield.armor_class}')
                 character.general_stats['AC'] += shield.armor_class
-                print(f'AC: {character.general_stats["AC"]}')
 
             if character.equipments['ARMOR EQUIPPED']:
                 equipped_armor = character.equipments['ARMOR EQUIPPED']
-                print(f'Armor: {equipped_armor.armor_class}')
                 character.general_stats['AC'] += equipped_armor.armor_class
-                print(f'AC: {character.general_stats["AC"]}')
 
-            input()
             clear_terminal()
 
             save_sheet(character)
@@ -3376,12 +3526,14 @@ def rest(character):
     )
 
     if answer == 'LONG REST':
-        for level in character.magical_ability.slots_spent.keys():
-            character.magical_ability.slots_spent[level] = 0
+        if character.magical_ability.has_magic:
+            for level in character.magical_ability.slots_spent.keys():
+                character.magical_ability.slots_spent[level] = 0
 
         character.general_stats['CURRENT HP'] = \
             character.general_stats['MAXIMUM HP'] \
             + character.general_stats['TEMPORARY HP']
+        character.general_stats['USED HIT DICE'] = 0
 
     elif answer == 'SHORT REST':
         if character.general_stats['CURRENT HP'] \
@@ -3392,7 +3544,10 @@ def rest(character):
                 # MULTICLASS
                 number = character.general_stats['HIT DICE'].max
                 options = {}
-                for level in range(character.general_info['LEVEL']):
+                for level in range(
+                        character.general_info['LEVEL']
+                        - character.general_stats['USED HIT DICE']
+                ):
                     dice = Dice(level + 1, number)
                     options[convert_dice_to_d_format(dice)] = dice
 
@@ -3408,19 +3563,37 @@ def rest(character):
                 if answer == 'GO BACK' or answer == 'EXIT':
                     return answer
                 else:
-                    recovered_hp = answer.roll(character.abilities.score('CON'))
+                    clear_terminal()
+                    if config['DICE ROLL'] == 'VIRTUAL':
+                        recovered_hp = answer.roll(
+                            modifier=character.abilities.score('CON')
+                        )
+                        print(f'You rolled {recovered_hp}!')
+                        print('Press ENTER to continue...')
+                        input()
+                    else:  # config['DICE ROLL'] == 'PHYSICAL'
+                        recovered_hp = get_typed_dice(
+                            dice=answer,
+                            objective='define your recovered HP.'
+                        )
+                        recovered_hp += character.abilities.score('CON')
 
-                    if character.general_info['CURRENT HP'] \
+                    if character.general_stats['CURRENT HP'] \
                             + recovered_hp \
-                            > character.general_info['MAXIMUM HP'] \
-                            + character.general_info['TEMPORARY HP']:
-                        character.general_info['CURRENT HP'] = \
-                            character.general_info['MAXIMUM HP'] \
-                            + character.general_info['TEMPORARY HP']
+                            > character.general_stats['MAXIMUM HP'] \
+                            + character.general_stats['TEMPORARY HP']:
+                        character.general_stats['CURRENT HP'] = \
+                            character.general_stats['MAXIMUM HP'] \
+                            + character.general_stats['TEMPORARY HP']
                     else:
-                        character.general_info['CURRENT HP'] += recovered_hp
+                        character.general_stats['CURRENT HP'] += recovered_hp
 
-                    character.general_stats['USED HIT DICE'] = answer.number
+                    print('You have now '
+                          f'{character.general_stats["CURRENT HP"]} HP.')
+                    print('Press ENTER to continue...')
+                    input()
+
+                    character.general_stats['USED HIT DICE'] += answer.number
 
     elif answer == 'EXIT':
         return answer
@@ -3446,8 +3619,13 @@ def death_check(character):
         print('Press ENTER to do another check.')
         input()
 
-        clear_terminal()
-        result = d20.roll()
+        if config['DICE ROLL'] == 'VIRTUAL':
+            result = d20.roll()
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            result = get_typed_dice(
+                dice=d20,
+                objective='make another saving throw against death.'
+            )
 
         print(f'You have rolled a {result}.')
 
@@ -3585,18 +3763,7 @@ def modify_equipment(character):
 
     new_equipment = group_equipment(new_equipment)
 
-    clear_terminal()
-    print(character.equipments)
-    print(new_equipment)
-    input()
-    clear_terminal()
-
     for category, equipments in new_equipment.items():
-        print(category)
-        print(equipments)
-        print(character.equipments[category])
-        input()
-        clear_terminal()
         character.equipments[category] += equipments
 
     character.wealth = new_wealth
@@ -3710,40 +3877,35 @@ def create_new_sheet(character):
     :param character: object of the class character
     :return: boolean if the sheet was created successfully or not
     """
-    loop = True
     cancel = False
-    folder = check_files()
+    folder = get_parent().joinpath('Files/Sheets')
     new_path = folder.joinpath(
         character.personal_info["CHARACTER'S NAME"] + '.txt'
     )
 
-    while loop:
-        if new_path.exists():
-            options_text = [
-                'RENAME CHARACTER',
-                'OVERWRITE SHEET',
-                'CANCEL NEW CHARACTER'
-            ]
-            answer = select(
-                options=options_text,
-                prompt='It looks like a sheet with this name already exists.',
-                single_item=True
+    while new_path.exists() and not cancel:
+        options_text = [
+            'RENAME CHARACTER',
+            'OVERWRITE SHEET',
+            'CANCEL NEW CHARACTER'
+        ]
+        answer = select(
+            options=options_text,
+            prompt='It looks like a sheet with this name already exists.',
+            single_item=True
+        )
+
+        if answer == 'RENAME CHARACTER':
+            character.personal_info["CHARACTER'S NAME"] = get_name()
+            new_path = folder.joinpath(
+                character.personal_info["CHARACTER'S NAME"] + '.txt'
             )
+        elif answer == 'OVERWRITE SHEET':
+            delete_sheet(new_path)
+        elif answer == 'CANCEL NEW CHARACTER':
+            cancel = True
 
-            if answer == 'RENAME CHARACTER':
-                character.personal_info["CHARACTER'S NAME"] = get_name()
-                new_path = folder.joinpath(
-                    character.personal_info["CHARACTER'S NAME"] + '.txt'
-                )
-            elif answer == 'OVERWRITE SHEET':
-                loop = False
-            elif answer == 'CANCEL NEW CHARACTER':
-                cancel = True
-                loop = False
-
-            clear_terminal()
-        else:
-            loop = False
+        clear_terminal()
 
     if not cancel:
         save_sheet(character)
@@ -3752,8 +3914,24 @@ def create_new_sheet(character):
         return False
 
 
+def get_config_value():
+    config_folder = get_parent().joinpath('Files')
+    config_file = config_folder.joinpath('config.txt')
+
+    if config_file.exists():
+        if os.path.getsize(config_file) > 0:
+            with open(config_file, 'rb') as config_txt:
+                value = pickle.load(config_txt)
+        else:
+            raise Exception('File config.txt empty!')
+
+    return value
+
+
 def routine_preparation():
     check_files()
+    global config
+    config = get_config_value()
     columns, lines = os.get_terminal_size()
 
     while columns != 80:
@@ -3829,7 +4007,15 @@ def level_up(character):
                 character.abilities.increment_ability(ability, increase)
 
         con_modifier = character.abilities.score('CON')
-        hp_addition = character.general_stats['HIT DICE'].roll(con_modifier)
+        if config['DICE ROLL'] == 'VIRTUAL':
+            hp_addition = character.general_stats['HIT DICE'].roll(con_modifier)
+        else:  # config['DICE ROLL'] == 'PHYSICAL'
+            hp_addition = get_typed_dice(
+                dice=character.general_stats['HIT DICE'],
+                objective='define your HP addition.'
+            )
+            hp_addition += con_modifier
+
         character.general_stats['MAXIMUM HP'] += hp_addition
         character.general_stats['CURRENT HP'] += hp_addition
         character.general_stats['HIT DICE'].number += 1
@@ -3891,6 +4077,52 @@ def level_up(character):
         )
 
 
+def edit_configurations():
+    global config
+
+    possible_values = {
+        'DICE ROLL': ['VIRTUAL', 'PHYSICAL'],
+    }
+
+    selected = None
+    while selected != 'EXIT':
+        options = {}
+        for configuration, status in config.items():
+            options[configuration] = configuration \
+                + ' ' \
+                + '.' * (75 - (len(configuration) + 2 + len(status))) \
+                + ' ' \
+                + status
+
+        selected = select(
+            options=options,
+            prompt='Select a configuration to edit it.\n',
+            show_type='value',
+            return_type='key',
+            single_item=True,
+            go_back=False
+        )
+
+        if selected != 'EXIT':
+            clear_terminal()
+
+            new_config = select(
+                options=possible_values[selected],
+                prompt=f'What is {selected} new value?',
+                single_item=True
+            )
+
+            if new_config == 'EXIT':
+                selected = 'EXIT'
+            elif new_config != 'GO BACK':
+                config[selected] = new_config
+
+    files_folder = check_files().joinpath('Files')
+    file = files_folder.joinpath('config.txt')
+    with open(file, 'wb') as config_file:
+        pickle.dump(config, config_file)
+
+
 def menu():
     """
     Creates a menu for the user to choose what he wants to do
@@ -3900,7 +4132,7 @@ def menu():
     end = False
 
     while not end:
-        choices = ['NEW SHEET', 'OPEN SHEET']
+        choices = ['NEW SHEET', 'OPEN SHEET', 'OPEN CONFIGURATIONS']
         choice = select(
             options=choices,
             prompt='Welcome to Character Sheets Manager!\n',
@@ -3921,6 +4153,9 @@ def menu():
             while sheet_path != 'GO BACK':
                 open_sheet(sheet_path)
                 sheet_path = show_sheets()
+
+        elif choice == 'OPEN CONFIGURATIONS':
+            edit_configurations()
 
         elif choice == 'EXIT':
             end = True
