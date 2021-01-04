@@ -955,10 +955,6 @@ def print_main_info(character):
     print(values)
 
 
-# TODO: Limit characters showing physical appearance
-#       (keywords: PHYSICAL APPEARANCE)
-
-
 def show_character_info(character):
     clear_terminal()
     print_name(
@@ -1652,14 +1648,8 @@ def generate_random_values():
                 if number > biggest_value:
                     biggest_value = number
 
-            # If there isn't a single value over 13, the values must be redone
-            if biggest_value < 14:
-                return False
-            # If the sum of modifiers is negative, the values must be redone
-            elif sum(modifiers) < 3:
-                return False
-            # If the sum modifiers is too big, the values must be redone
-            elif sum(modifiers) > 9:
+            # If the sum of modifiers is minus than 3, the values must be redone
+            if sum(modifiers) < 3:
                 return False
             else:
                 return True
@@ -2388,9 +2378,6 @@ def group_equipment(equipments):
     return equipments
 
 
-# TODO: remove excessive criteria to reroll when rolling abilities values
-
-
 def select_equipment(classe, background):
     equipments = None
     end = False
@@ -2887,8 +2874,7 @@ def show_sheets():
 
 
 def delete_sheet(sheet):
-    # TODO: Change the function of spells to show all spells available per level
-    #       if the number of spells known is -1
+
     folder = check_files()
     index_path = folder.joinpath('index.txt')
     string_path = sheet.as_posix()
@@ -3872,7 +3858,6 @@ def level_up(character):
             if character.general_info['LEVEL'] >= 2:
                 character.magical_ability.has_magic = True
 
-        # TODO: prepare the code to accept classes that must prepare spells
         # if character.magical_ability.prepared_spell is True:
 
         character.proficiencies['VALUE'] = character.backup[
