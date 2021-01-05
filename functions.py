@@ -1,5 +1,4 @@
 from variables import *
-from basic_functions import *
 import pickle
 import copy
 
@@ -3780,6 +3779,33 @@ def add_xp(character):
         level_up(character)
 
 
+def roll_dice():
+    dice = None
+    while dice != '':
+        print('Type the dice you want to roll.')
+        print('Formats accepted: [1d4, 1D4, 1d4+1, 1d4 + 1, 1d4-1, 1D4 - 1].')
+        print('Type nothing to go back.')
+        dice = input()
+        print('')
+
+        dice, modifier = convert_string_to_die(dice)
+
+        if dice is not None:
+            print('Your dice are valid! Press ENTER to roll them.')
+            input()
+
+            value = dice.roll(modifier)
+            print(f'You rolled {value}!')
+            print('Press ENTER to roll another dice.')
+            input()
+        else:
+            print('What you typed is not accepted. Please, try again.')
+            print('Press ENTER to continue...')
+            input()
+
+        clear_terminal()
+
+
 def play(character):
     answer = None
     what_to_do = [
@@ -3790,6 +3816,7 @@ def play(character):
         'ADD XP',
         'TAKE A REST',
         'DIE',
+        'ROLL DICE'
     ]
 
     while answer != 'GO BACK':
@@ -3823,6 +3850,9 @@ def play(character):
 
             if result == 'EXIT':
                 answer = 'GO BACK'
+
+        elif answer == 'ROLL DICE':
+            roll_dice()
 
         elif answer == 'SPELL SLOTS':
             result = use_magic(character)
@@ -4132,7 +4162,12 @@ def menu():
     end = False
 
     while not end:
-        choices = ['NEW SHEET', 'OPEN SHEET', 'OPEN CONFIGURATIONS']
+        choices = [
+            'NEW SHEET',
+            'OPEN SHEET',
+            'ROLL DICE',
+            'OPEN CONFIGURATIONS'
+        ]
         choice = select(
             options=choices,
             prompt='Welcome to Character Sheets Manager!\n',
@@ -4153,6 +4188,9 @@ def menu():
             while sheet_path != 'GO BACK':
                 open_sheet(sheet_path)
                 sheet_path = show_sheets()
+
+        elif choice == 'ROLL DICE':
+            roll_dice()
 
         elif choice == 'OPEN CONFIGURATIONS':
             edit_configurations()

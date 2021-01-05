@@ -1,4 +1,4 @@
-from classes import *
+from basic_functions import *
 
 padded_armor = Armor(
 	name='PADDED',

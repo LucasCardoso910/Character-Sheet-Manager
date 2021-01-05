@@ -1,5 +1,7 @@
 from math import ceil
 from pathlib import Path
+from classes import *
+import re
 import os
 
 
@@ -24,6 +26,28 @@ def convert_dice_to_d_format(dice):
     string = str(dice.number) + 'd' + str(dice.max)
 
     return string
+
+
+def convert_string_to_die(string):
+    pattern = r"^(\d+)d(\d+) *(\+|-)? *(\d*)$"
+    match = re.match(pattern, string, re.IGNORECASE)
+
+    if match is not None:
+        number = int(match.groups()[0])
+        maximum = int(match.groups()[1])
+        signal = match.groups()[2]
+
+        if signal is not None:
+            modifier = int(match.groups()[3])
+
+            if signal == '-':
+                modifier = -modifier
+        else:
+            modifier = 0
+
+        return [Dice(number, maximum), modifier]
+    else:
+        return [None, None]
 
 
 def get_typed_dice(dice, objective=None, times=1):
