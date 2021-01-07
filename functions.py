@@ -3788,20 +3788,21 @@ def roll_dice():
         dice = input()
         print('')
 
-        dice, modifier = convert_string_to_die(dice)
+        if dice != '':
+            dice, modifier = convert_string_to_die(dice)
 
-        if dice is not None:
-            print('Your dice are valid! Press ENTER to roll them.')
-            input()
+            if dice is not None:
+                print('Your dice are valid! Press ENTER to roll them.')
+                input()
 
-            value = dice.roll(modifier)
-            print(f'You rolled {value}!')
-            print('Press ENTER to roll another dice.')
-            input()
-        else:
-            print('What you typed is not accepted. Please, try again.')
-            print('Press ENTER to continue...')
-            input()
+                value = dice.roll(modifier)
+                print(f'You rolled {value}!')
+                print('Press ENTER to roll another dice.')
+                input()
+            else:
+                print('What you typed is not accepted. Please, try again.')
+                print('Press ENTER to continue...')
+                input()
 
         clear_terminal()
 
