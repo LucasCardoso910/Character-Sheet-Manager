@@ -1697,32 +1697,17 @@ def get_weight():
 
 
 def get_eye_color():
-    eye = get_a_number(
-        prompt="What is your character's eye color?",
-        go_back_message=False
-    )
-    eye = str(eye)
-
+    eye = input('What is your character\'s eye color?\n')
     return eye
 
 
 def get_skin_color():
-    skin = get_a_number(
-        prompt="What is your character's skin color?",
-        go_back_message=False
-    )
-    skin = str(skin)
-
+    skin = input('What is your character\'s skin color?\n')
     return skin
 
 
 def get_hair_color():
-    hair = get_a_number(
-        prompt="What is your character's hair color?",
-        go_back_message=False
-    )
-    hair = str(hair)
-
+    hair = input('What is your character\'s hair color?\n')
     return hair
 
 
