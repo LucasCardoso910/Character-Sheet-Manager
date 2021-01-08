@@ -1698,16 +1698,19 @@ def get_weight():
 
 def get_eye_color():
     eye = input('What is your character\'s eye color?\n')
+    clear_terminal()
     return eye
 
 
 def get_skin_color():
     skin = input('What is your character\'s skin color?\n')
+    clear_terminal()
     return skin
 
 
 def get_hair_color():
     hair = input('What is your character\'s hair color?\n')
+    clear_terminal()
     return hair
 
 
