@@ -617,18 +617,28 @@ def get_a_number(prompt=None, go_back_message=None):
 
             return number
         else:
-            print('Not a valid number.')
+            pattern = r'(\d+)(\.|,)(\d+)'
+            match = re.match(pattern, number)
 
-            end = False
-            if go_back_message:
-                end = True
-                print('Press ENTER to go back.')
+            if match:
+                groups = match.groups()
+                number = groups[0] + '.' + groups[2]
+                number = float(number)
 
-            input()
-            clear_terminal()
+                return number
+            else:
+                print('Not a valid number.')
 
-            if end:
-                return None
+                end = False
+                if go_back_message:
+                    end = True
+                    print('Press ENTER to go back.')
+
+                input()
+                clear_terminal()
+
+                if end:
+                    return None
 
 
 def set_string_size(string, size):

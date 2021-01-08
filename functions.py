@@ -1544,7 +1544,7 @@ def show_character(character):
                     show_character_info(character)
                     print_name('Cantrips')
                     print('')
-                    if len(character.magical_ability.cantrips) < 1:
+                    if len(character.magical_ability) == 0:
                         print('No cantrip to show here!')
                     else:
                         for cantrip in character.magical_ability.cantrips:
