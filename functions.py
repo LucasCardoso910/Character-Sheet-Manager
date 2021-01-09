@@ -1544,16 +1544,20 @@ def show_character(character):
                     show_character_info(character)
                     print_name('Cantrips')
                     print('')
-                    if len(character.magical_ability) == 0:
+                    if len(character.magical_ability.cantrips) == 0:
                         print('No cantrip to show here!')
                     else:
                         for cantrip in character.magical_ability.cantrips:
                             print(f'- {cantrip.title()}')
                     print('')
 
+                    max_spell_showed = 0
+
                     if len(character.magical_ability.spells) > 0:
                         for level, spells in character.magical_ability.spells. \
                                 items():
+                            max_spell_showed = level
+
                             if level == 1:
                                 ordinal = 'st'
                             elif level == 2:
@@ -1568,26 +1572,30 @@ def show_character(character):
                             for spell in spells:
                                 print(f'- {spell.title()}')
                             print('')
+
                     elif character.magical_ability.spells_known == -1:
                         for level, spells in index['SPELLS'][
                                 character.general_info['CLASS']].items():
-                            if level == 1:
-                                ordinal = 'st'
-                            elif level == 2:
-                                ordinal = 'nd'
-                            elif level == 3:
-                                ordinal = 'rd'
-                            else:
-                                ordinal = 'th'
+                            if character.magical_ability.spell_slots[level] > 0:
+                                max_spell_showed = level
 
-                            print_name(f'{level}{ordinal} level spells')
-                            print('')
-                            for spell in spells:
-                                print(f'- {spell.title()}')
-                            print('')
+                                if level == 1:
+                                    ordinal = 'st'
+                                elif level == 2:
+                                    ordinal = 'nd'
+                                elif level == 3:
+                                    ordinal = 'rd'
+                                else:
+                                    ordinal = 'th'
+
+                                print_name(f'{level}{ordinal} level spells')
+                                print('')
+                                for spell in spells:
+                                    print(f'- {spell.title()}')
+                                print('')
 
                     for level in range(
-                            len(character.magical_ability.spells) + 1,
+                            max_spell_showed + 1,
                             character.magical_ability.highest_spell_level + 1):
                         if level == 1:
                             ordinal = 'st'
@@ -3764,7 +3772,8 @@ def add_xp(character):
     if new_xp is not None:
         character.general_info['XP'] += new_xp
 
-        level_up(character)
+        while level_up(character):
+            pass
 
 
 def roll_dice():
@@ -4094,6 +4103,10 @@ def level_up(character):
             level=character.general_info['LEVEL'],
             magical_ability=character.magical_ability
         )
+
+        return True
+    else:
+        return False
 
 
 def edit_configurations():
