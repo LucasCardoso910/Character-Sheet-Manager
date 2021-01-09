@@ -617,13 +617,23 @@ def get_a_number(prompt=None, go_back_message=None):
 
             return number
         else:
-            pattern = r'(\d+)(\.|,)(\d+)'
+            pattern = r"(\d+)(\.|,|')(\d+)('')?"
             match = re.match(pattern, number)
 
             if match:
                 groups = match.groups()
-                number = groups[0] + '.' + groups[2]
-                number = float(number)
+                if groups[1] == "'":  # It's a height.
+                    feet = int(groups[0])
+                    inches = int(groups[2])
+
+                    if inches >= 12:
+                        feet += inches / 12
+                        inches = inches % 12
+
+                    number = f"{feet}'{inches}''"
+                else:
+                    number = f'{groups[0]}.{groups[2]}'
+                    number = float(number)
 
                 return number
             else:

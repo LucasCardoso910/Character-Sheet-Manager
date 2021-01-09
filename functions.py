@@ -1697,28 +1697,27 @@ def get_height(race):
 def get_weight():
     weight = get_a_number(
         prompt="What is your character's weight?",
-        go_back_message=False
-    )
+        go_back_message=False)
     weight = str(weight)
 
     return weight
 
 
 def get_eye_color():
-    eye = input('What is your character\'s eye color?\n')
     clear_terminal()
+    eye = input('What is your character\'s eye color?\n')
     return eye
 
 
 def get_skin_color():
-    skin = input('What is your character\'s skin color?\n')
     clear_terminal()
+    skin = input('What is your character\'s skin color?\n')
     return skin
 
 
 def get_hair_color():
-    hair = input('What is your character\'s hair color?\n')
     clear_terminal()
+    hair = input('What is your character\'s hair color?\n')
     return hair
 
 
@@ -3390,32 +3389,47 @@ def use_magic(character):
     clear_terminal()
 
     if character.magical_ability.has_magic is not None:
-        print('This is a beta version of the magic '
-              'use in Character Sheet Manager.')
         loop = True
         while loop:
-            max_slot = None
-            for slot, spells in character.magical_ability.spell_slots.items():
-                if spells - character.magical_ability.slots_spent[slot] > 0:
-                    max_slot = slot
+            prompt = "I'M BRUTALITOPS! The Magician! Magic user baby, what?\n\n"
 
-            options = []
-            for slot_level in range(max_slot):
-                options.append(slot_level + 1)
+            if character.magical_ability.slots_spent \
+                    != character.magical_ability.spell_slots:
+                prompt += 'You still have slots to spend.\n\n'
 
-            answer = select(
-                options=options,
-                prompt='Select the spell slot desired '
-                       'to spent to cast this spell!',
-                single_item=True,
-            )
+                options = []
+                for lvl, slots in character.magical_ability.spell_slots.items():
+                    slots_spent = character.magical_ability.slots_spent[lvl]
+                    available_slots = slots - slots_spent
 
-            if answer == 'GO BACK':
-                return answer
-            elif answer == 'EXIT':
-                return answer
+                    if available_slots > 0:
+                        options.append(str(lvl))
+                        prompt += f'You have {available_slots} ' \
+                                  f'slots of level {lvl} to spend.\n'
+
+                answer = select(
+                    options=options,
+                    prompt=prompt,
+                    single_item=True,
+                )
+
+                if answer == 'GO BACK':
+                    return answer
+                elif answer == 'EXIT':
+                    return answer
+                else:
+                    answer = int(answer)
+                    character.magical_ability.slots_spent[answer] += 1
             else:
-                character.magical_ability.slots_spent[answer] += 1
+                print('It appears you already spent all available slots!')
+                print('Try to take a rest to make some '
+                      'or all of them available again.')
+                print('Press ENTER to GO BACK...')
+                input()
+
+                return None
+
+            clear_terminal()
     else:
         print('Your character has no access to magic.')
         input()
@@ -3807,14 +3821,14 @@ def roll_dice():
 def play(character):
     answer = None
     what_to_do = [
+        'ROLL DICE',
         'EQUIP ARMOR',
         'MODIFY EQUIPMENT',
         'MODIFY HP',
-        'SPELL SLOTS',
+        'CAST A SPELL',
         'ADD XP',
         'TAKE A REST',
         'DIE',
-        'ROLL DICE'
     ]
 
     while answer != 'GO BACK':
@@ -3852,7 +3866,7 @@ def play(character):
         elif answer == 'ROLL DICE':
             roll_dice()
 
-        elif answer == 'SPELL SLOTS':
+        elif answer == 'CAST A SPELL':
             result = use_magic(character)
 
             if result == 'EXIT':

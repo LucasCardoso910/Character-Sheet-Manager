@@ -569,7 +569,7 @@ class Class:
                 specialization_choices.append(key)
 
             if specialization not in specialization_choices:
-                if specialization is not None:
+                if specialization not in [False, None]:
                     print('\nSpecialization error!')
                     print('This name does not exist. Please check spelling\n')
 
