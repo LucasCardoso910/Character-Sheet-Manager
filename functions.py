@@ -1035,6 +1035,9 @@ def create_class(classe, level, abilities):
 
     classe.features = create_simple_list(classe.features)
 
+    classe.equipment = create_simple_list(classe.equipment)
+    classe.equipment = group_equipment(classe.equipment)
+
     return classe
 
 
@@ -1090,6 +1093,7 @@ def print_main_info(character):
 
 def show_character_info(character):
     clear_terminal()
+
     print_name(
         name=character.personal_info["CHARACTER'S NAME"].title(),
         category=f'{character.general_info["RACE"].title()} '
@@ -1173,6 +1177,56 @@ def select_spells(character):
     return spells
 
 
+def prepare_spells(character, finish=True):
+    magical_ability = character.magical_ability
+
+    if magical_ability.has_magic is None:
+        return None
+
+    if magical_ability.prepare_spells is not True:
+        return None
+
+    spells_to_prepare = []
+    if magical_ability.spells_known == -1:
+        for lvl, spells in index['SPELLS'][magical_ability.spell_list].items():
+            if magical_ability.spell_slots[lvl] > 0:
+                spells_to_prepare += spells
+
+    elif magical_ability.spells_known > 0:
+        for level, spells in magical_ability.spells.items():
+            spells_to_prepare += spells
+
+    if len(spells_to_prepare) == 0:
+        return None
+
+    prepared_spells = select(
+        options=spells_to_prepare,
+        quantity=magical_ability.number_prepared_spells,
+        prompt='Select the spells that you are gonna have prepared.',
+        single_item=True,
+        go_back=False,
+        finish=finish,
+    )
+
+    if prepared_spells in ['GO BACK', 'EXIT']:
+        return prepared_spells
+
+    list_prepared_spells = prepared_spells.copy()
+    dict_prepared_spells = {}
+    for spell in list_prepared_spells:
+        for lvl, spells in index['SPELLS'][magical_ability.spell_list].items():
+            if spell in spells:
+                try:
+                    dict_prepared_spells[lvl].append(spell)
+                except KeyError:
+                    dict_prepared_spells[lvl] = [spell]
+
+    prepared_spells = dict_prepared_spells
+    character.magical_ability.prepared_spells = prepared_spells
+
+    return None
+
+
 def get_dict_with_units(original):
     return_dict = {}
 
@@ -1185,10 +1239,102 @@ def get_dict_with_units(original):
     return return_dict
 
 
-def show_character(character):
-    end = False
+def check_spells(character):
+    if len(character.magical_ability.cantrips) \
+            < character.magical_ability.cantrips_known:
+        new_cantrips = select_cantrips(character)
 
-    while not end:
+        if new_cantrips not in ['EXIT', 'GO BACK']:
+            character.magical_ability.set_cantrips(new_cantrips)
+            save_sheet(character)
+
+        elif new_cantrips == 'EXIT':
+            return 'EXIT'
+
+    elif character.magical_ability.cantrips_known == -1:
+        character.magical_ability.set_cantrips([])
+
+    spells_list = []
+    for spells in character.magical_ability.spells.values():
+        spells_list += spells
+
+    if len(spells_list) < character.magical_ability.spells_known:
+        new_spells = select_spells(character)
+
+        if new_spells not in ['EXIT', 'GO BACK']:
+            character.magical_ability.set_spells(new_spells)
+            save_sheet(character)
+        elif new_spells == 'EXIT':
+            return 'EXIT'
+
+    if character.magical_ability.prepare_spells:
+        if len(character.magical_ability.prepared_spells) == 0:
+            result = prepare_spells(character)
+            if result in ['EXIT']:
+                return result
+            else:
+                save_sheet(character)
+
+    return None
+
+
+def print_spells(spells_dict):
+    max_spell_showed = 0
+
+    for level, spells in spells_dict.items():
+        max_spell_showed = level
+        ordinal = get_ordinal(level)
+
+        print_name(f'{level}{ordinal} level spells')
+        print('')
+        for spell in spells:
+            print(f'- {spell.title()}')
+        print('')
+
+    return max_spell_showed
+
+
+def show_spells(character, enter_continue=True, show_empty=True):
+    magical_ability = character.magical_ability
+
+    print_name('Cantrips')
+    print('')
+    if len(magical_ability.cantrips) == 0:
+        print('No cantrip to show here!')
+    else:
+        for cantrip in magical_ability.cantrips:
+            print(f'- {cantrip.title()}')
+    print('')
+
+    max_spell_showed = 0
+    if magical_ability.prepare_spells:
+        if len(magical_ability.prepared_spells) > 0:
+            max_spell_showed = print_spells(magical_ability.prepared_spells)
+    else:
+        if len(magical_ability.spells) > 0:
+            max_spell_showed = print_spells(magical_ability.spells)
+
+    if show_empty:
+        for level in range(
+                max_spell_showed + 1,
+                magical_ability.highest_spell_level + 1
+        ):
+            ordinal = get_ordinal(level)
+
+            print_name(f'{level}{ordinal} level spells')
+            print('')
+            print('No spell to show here!')
+            print('')
+
+    if enter_continue:
+        print('')
+        print('Press ENTER to continue')
+        input()
+
+
+def show_character(character):
+    answer = None
+    while answer != 'GO BACK':
         show_character_info(character)
 
         what_to_see = [
@@ -1512,108 +1658,12 @@ def show_character(character):
 
         elif answer == 'SPELLS':
             if character.magical_ability.has_magic:
-                go_on = True
-                if len(character.magical_ability.cantrips) \
-                        < character.magical_ability.cantrips_known:
-                    new_cantrips = select_cantrips(character)
-
-                    if new_cantrips not in ['EXIT', 'GO BACK']:
-                        character.magical_ability.set_cantrips(new_cantrips)
-                        save_sheet(character)
-                    elif new_cantrips == 'EXIT':
-                        go_on = False
-                elif character.magical_ability.cantrips_known == -1:
-                    character.magical_ability.set_cantrips([])
-
-                if go_on:
-                    spells_list = []
-                    for level, level_spells in character.magical_ability \
-                            .spells.items():
-                        spells_list += level_spells
-
-                    if len(spells_list) \
-                            < character.magical_ability.spells_known:
-                        new_spells = select_spells(character)
-
-                        if new_spells not in ['EXIT', 'GO BACK']:
-                            character.magical_ability.set_spells(new_spells)
-                            save_sheet(character)
-                        elif new_spells == 'EXIT':
-                            return 'EXIT'
-
+                result = check_spells(character)
+                if result is None:
                     show_character_info(character)
-                    print_name('Cantrips')
-                    print('')
-                    if len(character.magical_ability.cantrips) == 0:
-                        print('No cantrip to show here!')
-                    else:
-                        for cantrip in character.magical_ability.cantrips:
-                            print(f'- {cantrip.title()}')
-                    print('')
-
-                    max_spell_showed = 0
-
-                    if len(character.magical_ability.spells) > 0:
-                        for level, spells in character.magical_ability.spells. \
-                                items():
-                            max_spell_showed = level
-
-                            if level == 1:
-                                ordinal = 'st'
-                            elif level == 2:
-                                ordinal = 'nd'
-                            elif level == 3:
-                                ordinal = 'rd'
-                            else:
-                                ordinal = 'th'
-
-                            print_name(f'{level}{ordinal} level spells')
-                            print('')
-                            for spell in spells:
-                                print(f'- {spell.title()}')
-                            print('')
-
-                    elif character.magical_ability.spells_known == -1:
-                        for level, spells in index['SPELLS'][
-                                character.general_info['CLASS']].items():
-                            if character.magical_ability.spell_slots[level] > 0:
-                                max_spell_showed = level
-
-                                if level == 1:
-                                    ordinal = 'st'
-                                elif level == 2:
-                                    ordinal = 'nd'
-                                elif level == 3:
-                                    ordinal = 'rd'
-                                else:
-                                    ordinal = 'th'
-
-                                print_name(f'{level}{ordinal} level spells')
-                                print('')
-                                for spell in spells:
-                                    print(f'- {spell.title()}')
-                                print('')
-
-                    for level in range(
-                            max_spell_showed + 1,
-                            character.magical_ability.highest_spell_level + 1):
-                        if level == 1:
-                            ordinal = 'st'
-                        elif level == 2:
-                            ordinal = 'nd'
-                        elif level == 3:
-                            ordinal = 'rd'
-                        else:
-                            ordinal = 'th'
-
-                        print_name(f'{level}{ordinal} level spells')
-                        print('')
-                        print('No spell to show here!')
-                        print('')
-
-                    print('')
-                    print('Press ENTER to continue')
-                    input()
+                    show_spells(character)
+                elif result == 'EXIT':
+                    return result
             else:
                 show_character_info(character)
                 print('It appears that your character has no coward magic!')
@@ -1621,13 +1671,11 @@ def show_character(character):
                 print('Press ENTER to continue')
                 input()
 
-        elif answer == 'GO BACK':
-            end = True
-
         clear_terminal()
 
 
 def get_history():
+    clear_terminal()
     print("What is your character's history?")
 
     history = []
@@ -1670,7 +1718,7 @@ def get_name():
 
             clear_terminal()
 
-    return name
+    return name.upper()
 
 
 def get_age(race):
@@ -2533,33 +2581,63 @@ def select_equipment(classe, background):
 
         if equipment_bought == 'EXIT':
             equipments = 'EXIT'
-            end = True
         elif equipment_bought == 'GO BACK':
             equipments = 'GO BACK'
-            end = True
 
+        new_wealth = -1
         if equipment_bought is True:
-            new_equipments, new_wealth = buy_equipment(classe.starting_wealth)
+            equipments, new_wealth = buy_equipment(classe.starting_wealth)
 
-            if new_equipments != 'GO BACK' and new_equipments is not None:
-                end = True
-                equipments = new_equipments
-                classe.wealth = new_wealth
         elif equipment_bought is False:
             classe.wealth = -1
             equipments = choose_equipment(equipment_choices)
 
-            if equipments != 'GO BACK' and equipments != 'EXIT':
-                end = True
-            elif equipments == 'EXIT':
-                end = True
-                equipments = 'EXIT'
-
-        if end and equipments != 'EXIT' and equipment_bought != 'GO BACK':
-            equipments.append(random_trinket())
-
+        if equipments != 'GO BACK' \
+                and equipments != 'EXIT' \
+                and equipments is not None:
             equipments = create_simple_list(equipments)
             equipments = group_equipment(equipments)
+
+            clear_terminal()
+            print('You have chosen:\n')
+            for category, items in equipments.items():
+                if isinstance(items, list) and len(items) > 0:
+                    print_name(category)
+
+                    items_units = {}
+                    for item in items:
+                        try:
+                            items_units[item] += 1
+                        except KeyError:
+                            items_units[item] = 1
+
+                    for item, units in items_units.items():
+                        print(f'- {item.name.title()} x{units}')
+                    print('')
+
+            answer = select(
+                options=['CONFIRM', 'RESTART'],
+                prompt='Select what you want to do with this equipment:',
+                single_item=True,
+                clean=False,
+            )
+
+            if answer == 'CONFIRM':
+                end = True
+
+                if new_wealth != -1:
+                    classe.wealth = new_wealth
+            elif answer in ['GO BACK', 'EXIT']:
+                equipments = answer
+
+        elif equipments == 'EXIT':
+            end = True
+
+        elif equipments == 'GO BACK':
+            end = True
+
+        if end and equipments != 'EXIT' and equipments != 'GO BACK':
+            equipments['TRINKETS'] = [random_trinket()]
 
     return equipments
 
@@ -2851,7 +2929,6 @@ def create_new_character():
     ]
 
     if loop_through_functions(variables, functions_order):
-
         variables['BACKGROUND'].feature = variables['FEATURE']
         try:
             variables['RACE'].tools_proficiency = variables['TOOLS']['RACE']
@@ -2860,6 +2937,10 @@ def create_new_character():
                 variables['TOOLS']['BACKGROUND']
         except (KeyError, TypeError):
             pass
+
+        for category in variables['EQUIPMENTS'].keys():
+            variables['EQUIPMENTS'][category] += \
+                variables['CLASS'].equipment[category]
 
         character = Character(
             race=variables['RACE'],
@@ -2880,8 +2961,11 @@ def create_new_character():
             magical_ability=character.magical_ability
         )
 
-        character.xp = character.xp_by_level[character.general_info['LEVEL']]
-        for _ in range(character.general_info['LEVEL'], character.real_level):
+        for lvl in range(
+                character.general_info['LEVEL'],
+                variables['CLASS'].level
+        ):
+            character.general_info['XP'] = character.xp_by_level[lvl]
             level_up(character)
 
         return character
@@ -3141,7 +3225,7 @@ def edit_character(character):
         elif to_edit == 'SKILLS':
             new_skills = select_skills(
                 race=character.backup['RACE'],
-                classe=character.backup['CLASSE'],
+                classe=character.backup['CLASS'],
                 background=character.backup['BACKGROUND']
             )
 
@@ -3220,7 +3304,16 @@ def edit_character(character):
                 if answer == 'PLAYER NAME':
                     character.general_info["PLAYER'S NAME"] = get_player_name()
                 elif answer == 'CHARACTER NAME':
-                    character.general_info["CHARACTER'S NAME"] = get_name()
+                    parent_folder = get_parent()
+                    sheets_folder = parent_folder.joinpath('Files/Sheets')
+                    sheet_file = sheets_folder.joinpath(
+                        character.general_info["NAME"] + '.txt'
+                    )
+                    delete_sheet(sheet_file)
+                    new_name = get_name()
+                    character.general_info["NAME"] = new_name
+                    character.personal_info["CHARACTER'S NAME"] = new_name
+                    save_sheet(character)
                 elif answer == 'AGE':
                     character.personal_info['AGE'] = get_age(
                         character.backup['RACE'])
@@ -3387,15 +3480,14 @@ def skill_check(character):
 
 def use_magic(character):
     clear_terminal()
+    check_spells(character)
 
     if character.magical_ability.has_magic is not None:
         loop = True
         while loop:
-            prompt = "I'M BRUTALITOPS! The Magician! Magic user baby, what?\n\n"
-
             if character.magical_ability.slots_spent \
                     != character.magical_ability.spell_slots:
-                prompt += 'You still have slots to spend.\n\n'
+                prompt = 'You still have slots to spend.\n\n'
 
                 options = []
                 for lvl, slots in character.magical_ability.spell_slots.items():
@@ -3406,11 +3498,22 @@ def use_magic(character):
                         options.append(str(lvl))
                         prompt += f'You have {available_slots} ' \
                                   f'slots of level {lvl} to spend.\n'
+                prompt += '\nSelect the spell slot you want to spend.'
+
+                show_spells(
+                    character=character,
+                    enter_continue=False,
+                    show_empty=False,
+                )
+
+                print_name('-')
+                print('')
 
                 answer = select(
                     options=options,
                     prompt=prompt,
                     single_item=True,
+                    clean=False
                 )
 
                 if answer == 'GO BACK':
@@ -3422,8 +3525,7 @@ def use_magic(character):
                     character.magical_ability.slots_spent[answer] += 1
             else:
                 print('It appears you already spent all available slots!')
-                print('Try to take a rest to make some '
-                      'or all of them available again.')
+                print('Try to take a rest to make them available again.')
                 print('Press ENTER to GO BACK...')
                 input()
 
@@ -3539,6 +3641,18 @@ def rest(character):
             for level in character.magical_ability.slots_spent.keys():
                 character.magical_ability.slots_spent[level] = 0
 
+            if character.magical_ability.prepare_spells:
+                choice = select(
+                    options=['YES', 'NO'],
+                    prompt='Would you like to change your prepared spells?',
+                    single_item=True,
+                    go_back=False,
+                    finish=False
+                )
+
+                if choice == 'YES':
+                    prepare_spells(character, finish=False)
+
         character.general_stats['CURRENT HP'] = \
             character.general_stats['MAXIMUM HP'] \
             + character.general_stats['TEMPORARY HP']
@@ -3607,6 +3721,7 @@ def rest(character):
     elif answer == 'EXIT':
         return answer
 
+    save_sheet(character)
     return None
 
 

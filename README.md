@@ -5,10 +5,12 @@ An easy way to create D&D character sheets!
 D&D is a fun game. It allows you to create all sorts of characters with no
 limits but your imagination. Now, creating a new character is even easier with
 Character Sheet Manager.
+
 Although you can create anything in D&D, it can be quite a boring and
 mechanical task. The Character Sheet Manager fits in this particular space.
 You will no longer need to go page to page in the Player's Handbook, copying
 and pasting information about your race, class, background, etc.
+
 Character Sheet Manager allows you to create a new Character by only choosing
 the necessary items. Fixed features are automatically assigned to your
 character, with absolutely no need for manual labor.
@@ -60,12 +62,14 @@ characters.
 isn't in the Player's Handbook.
 7. A glossary with all the info that someone might want to know about D&D.
 8. A Dungeon's Master version, to show and manage more than just one sheet.
+9. Full translation to Portuguese, including units.
 
 ### Who am I?
 Hello. My name is Lucas. I am a Computer Science student in Brazil. This is
 my biggest project so far and my first real program in Python. I am starting
 in this programming world and just really wanted to try new things and to put
 into practice my learnings so far.
+
 I know that this program may have several errors, bugs, and more efficient
 ways to do what it does. If, by any chance, you are reading this code and want
 to help, to correct something, or show me a better way to code, feel completely

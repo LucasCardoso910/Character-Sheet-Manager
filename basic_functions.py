@@ -209,12 +209,47 @@ def select(
         else:
             copy_options += ['EXIT']
 
+    backup_quantity = quantity
+    backup_go_back = go_back
+
     inform_quantity = False
     if quantity > 1:
         inform_quantity = True
 
     latest_choice = None
     while quantity != 0:
+        if len(selections) > 0:
+            latest_choice = selections[-1]
+            if 'GO BACK' not in copy_options:
+                if finish:
+                    if isinstance(copy_options, dict):
+                        del copy_options['EXIT']
+                    else:
+                        copy_options.remove('EXIT')
+
+                if isinstance(copy_options, dict):
+                    copy_options['GO BACK'] = 'GO BACK'
+
+                    if finish:
+                        copy_options['EXIT'] = 'EXIT'
+                else:
+                    copy_options.append('GO BACK')
+
+                    if finish:
+                        copy_options.append('EXIT')
+        elif len(selections) == 0:
+            if go_back is False:
+                if isinstance(copy_options, dict):
+                    try:
+                        del copy_options['GO BACK']
+                    except KeyError:
+                        pass
+                else:
+                    try:
+                        copy_options.remove('GO BACK')
+                    except ValueError:
+                        pass
+
         if selections != 'EXIT' and selections != 'GO BACK':
             valid_answer = False
             choice = None
@@ -227,15 +262,8 @@ def select(
                     print(prompt)
 
                 if selections:
-                    selections_names = []
-                    for selection in selections:
-                        if type(selection) is not str:
-                            selections_names.append(selection.name)
-                        else:
-                            selections_names.append(selection)
-
                     print('You have chosen so far:')
-                    print(selections_names)
+                    print(selections)
 
                 if inform_quantity:
                     print(f'You have {quantity} choices to do.\n')
@@ -314,9 +342,37 @@ def select(
                 latest_choice = choice
 
     clear_terminal()
-    if len(selections) == 1 and single_item is True:
-        selection = selections[0]
-        return selection
+    if len(selections) == 1:
+        if single_item is True:
+            selection = selections[0]
+            return selection
+    elif isinstance(selections, list) and len(selections) > 1:
+        prompt = 'You have chosen in total:\n'
+        prompt += f'{selections}'
+
+        choice = select(
+            options=['CONFIRM', 'RESTART'],
+            prompt=prompt,
+            single_item=True,
+            go_back=go_back,
+            finish=finish,
+        )
+
+        if choice == 'RESTART':
+            selections = select(
+                options=options,
+                quantity=backup_quantity,
+                prompt=prompt,
+                show_type=show_type,
+                return_type=return_type,
+                single_item=single_item,
+                clean=clean,
+                go_back=backup_go_back,
+                finish=finish,
+            )
+
+        elif choice in ['GO BACK', 'EXIT']:
+            selections = choice
 
     return selections
 
@@ -662,3 +718,22 @@ def set_string_size(string, size):
 
 def get_parent():
     return Path(__file__).absolute().parent
+
+
+def get_ordinal(number):
+    if not isinstance(number, str):
+        number = str(number)
+
+    last_digit = number[-1]
+    last_two_digits = number[-2:]
+
+    if last_digit == '1' and last_two_digits != '11':
+        ordinal = 'st'
+    elif number == '2' and last_two_digits != '12':
+        ordinal = 'nd'
+    elif number == '3' and last_two_digits != '13':
+        ordinal = 'rd'
+    else:
+        ordinal = 'th'
+
+    return ordinal

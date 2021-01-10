@@ -370,7 +370,7 @@ class MagicAbilities:
                     number_prepared_spells = 0
 
                 if prepared_spells is None:
-                    prepared_spells = []
+                    prepared_spells = {}
 
         self.has_magic = has_magic
         self.magical_ability = magical_ability
@@ -3849,8 +3849,6 @@ class Character:
         else:
             self.magical_ability = MagicAbilities()
 
-        self.sessions = 0
-
         # Store the functions from the Class class to the character Class
         self.select_features = classe.select_features
         self.specialization_check = classe.specialization_check
@@ -3862,5 +3860,3 @@ class Character:
         self.dead = False
         self.checks_succeeded = 0
         self.checks_failed = 0
-        self.real_level = classe.level
-        self.general_info['XP'] = self.xp_by_level[self.real_level]
