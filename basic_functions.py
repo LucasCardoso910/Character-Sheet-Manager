@@ -667,44 +667,55 @@ def get_a_number(prompt=None, go_back_message=None):
 
         number = input()
 
-        if number.isnumeric():
-            clear_terminal()
-            number = int(number)
+        pattern = r"(-?)(\d+)(\.|,|')?(\d*)('')?"
+        match = re.match(pattern, number)
 
-            return number
-        else:
-            pattern = r"(\d+)(\.|,|')(\d+)('')?"
-            match = re.match(pattern, number)
+        if match:
+            valid = True
+            groups = match.groups()
 
-            if match:
-                groups = match.groups()
-                if groups[1] == "'":  # It's a height.
-                    feet = int(groups[0])
-                    inches = int(groups[2])
+            negative = False
+            if groups[0] == '-':
+                negative = True
+
+            if groups[2] == "'":  # It's a height.
+                if negative:  # A height can not be a negative number.
+                    valid = False
+                else:
+                    feet = int(groups[1])
+                    inches = int(groups[3])
 
                     if inches >= 12:
                         feet += inches / 12
                         inches = inches % 12
 
                     number = f"{feet}'{inches}''"
-                else:
-                    number = f'{groups[0]}.{groups[2]}'
-                    number = float(number)
+
+            elif groups[2] is None:  # It's an integer
+                number = int(groups[1])
+
+            else:  # It's a float
+                number = f'{groups[1]}.{groups[3]}'
+                number = float(number)
+
+            if valid:
+                if negative:
+                    number = -number
 
                 return number
-            else:
-                print('Not a valid number.')
 
-                end = False
-                if go_back_message:
-                    end = True
-                    print('Press ENTER to go back.')
+        print('Not a valid number.')
 
-                input()
-                clear_terminal()
+        end = False
+        if go_back_message:
+            end = True
+            print('Press ENTER to go back.')
 
-                if end:
-                    return None
+        input()
+        clear_terminal()
+
+        if end:
+            return None
 
 
 def set_string_size(string, size):
