@@ -1,5 +1,6 @@
 from random import randint
 from math import floor
+import logging
 
 
 class Dice:
@@ -11,13 +12,45 @@ class Dice:
         self.number = number
         self.max = maximum
 
-    def roll(self, modifier=0):
-        values = []
+    def roll(
+            self,
+            modifier=0,
+            advantage=False,
+            disadvantage=False,
+            silence=False
+    ):
+        loop = 1 if advantage is False and disadvantage is False else 2
+        results = []
 
-        for i in range(self.number):
-            values.append(randint(1, self.max))
+        for i in range(loop):
+            dice_result = []
+            for _ in range(self.number):
+                dice_result.append(randint(1, self.max))
 
-        return sum(values) + modifier
+            results.append(sum(dice_result))
+
+        results.sort()
+
+        if advantage or disadvantage:
+            if not silence:
+                print(f'You rolled: {results[0]} and {results[1]}!')
+
+            if advantage:
+                result = results[-1]
+                if not silence:
+                    print('You have ADVANTAGE, so you get the biggest value.')
+                    print(f'Making your roll value of {result}')
+
+            else:  # disadvantage
+                result = results[0]
+                if not silence:
+                    print('You have DISADVANTAGE, so you get the lowest value.')
+                    print(f'Making your roll value of {result}')
+
+        else:  # Not advantage, nor disadvantage
+            result = results[0]
+
+        return result + modifier
 
 
 class Abilities:
