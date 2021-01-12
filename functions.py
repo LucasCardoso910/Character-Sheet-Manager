@@ -4,7 +4,8 @@ import copy
 
 
 config = {
-    'DICE ROLL': 'VIRTUAL'
+    'DICE ROLL': 'VIRTUAL',
+    'ATTACK ALWAYS NO': 'FALSE',
 }
 
 
@@ -3341,7 +3342,6 @@ def edit_character(character):
     return True
 
 
-"""
 def weapon_attack(character):
     clear_terminal()
 
@@ -3351,128 +3351,175 @@ def weapon_attack(character):
     options = {}
     for weapon in character.equipments['WEAPONS']:
         options[f'{weapon.name.title()}'] = weapon
-    options['CANCEL'] = 'CANCEL'
 
-    weapon = select(
-        options=options,
-        prompt='Select a weapon:',
-        show_type='key',
-        return_type='value',
-        single_item=True
-    )
-
-    if weapon != 'CANCEL':
-        clear_terminal()
-
-        # TODO: Add the selection of different conditions for the attack,
-        # 		i.e., stealth, with advantage
-
-        proficiency = False
-        ability_modifier = None
-        damage = None
-
-        if weapon.name in character.proficiencies['WEAPONS']:
-            proficiency = True
-
-        if proficiency:
-            proficiency = character.proficiencies['VALUE']
-        else:
-            proficiency = 0
-
-        if 'FINESSE' in weapon.properties:
-            if dex_modifier > str_modifier:
-                ability_modifier = dex_modifier
-            else:
-                ability_modifier = str_modifier
-
-        elif 'THROWN' in weapon.properties:
-            answer = select(
-                options=['THROW', 'DON\'T THROW'],
-                prompt='This weapon may be thrown. What do you desire to do?',
-                single_item=True,
-                go_back=False
-            )
-
-            if answer == 'THROW':
-                ability_modifier = dex_modifier
-            elif answer == 'DON\'T THROW':
-                ability_modifier = str_modifier
-            elif answer == 'EXIT':
-                return answer
-
-        else:
-            for classifications in index['EQUIPMENT']['WEAPON'].values():
-                for classification, items in classifications.items():
-                    if weapon in items.values():
-                        if classification == 'MELEE':
-                            ability_modifier = str_modifier
-                        elif classification == 'RANGED':
-                            ability_modifier = dex_modifier
-
-        if ability_modifier is None:
-            raise Exception('Error in weapon_attack!'
-                            ' Value of ability_modifier is None!')
-
-        answer = select(
-            options=['NONE', 'STEALTH', 'ADVANTAGE', 'DISADVANTAGE'],
-            prompt='Are you in a situation that will affect your attack?',
-            single_item=True,
-            go_back=False,
+    while True:
+        weapon = select(
+            options=options,
+            prompt='Select a weapon:',
+            show_type='key',
+            return_type='value',
+            single_item=True
         )
 
-        loop = 1
-        weapon.damage.modifier = ability_modifier
-        damage_dice = convert_dice_to_d_format(weapon.damage)
-        attack_modifier = ability_modifier + proficiency
-        d20 = Dice()
-        d20_string = convert_dice_to_d_format(d20)
+        if weapon != 'GO BACK' and weapon != 'EXIT':
+            ability_modifier = None
 
-        if answer != 'EXIT':
-            if answer == 'STEALTH':
+            if weapon.name in character.proficiencies['WEAPONS']:
+                proficiency = character.proficiencies['VALUE']
+            else:
+                proficiency = 0
 
-            elif answer in ['ADVANTAGE', 'DISADVANTAGE']:
-                loop = 2
+            if 'FINESSE' in weapon.properties:
+                if dex_modifier > str_modifier:
+                    ability_modifier = dex_modifier
+                else:
+                    ability_modifier = str_modifier
 
-                answer = None
-                if answer == 'ADVANTAGE':
-                    choose_number = '>'
-                elif answer == 'DISADVANTAGE':
-                    choose_number = '<'
-        else:
-            return answer
+            elif 'THROWN' in weapon.properties:
+                if config['ATTACK ALWAYS NO'] == 'FALSE':
+                    answer = select(
+                        options=['THROW', 'DON\'T THROW'],
+                        prompt='This weapon can be thrown. Would you like to?',
+                        single_item=True,
+                        go_back=False
+                    )
 
-        results = []
-        damages = []
-        for _ in range(loop):
-            result = d20.roll(attack_modifier)
+                    if answer == 'THROW':
+                        ability_modifier = dex_modifier
+                    elif answer == 'DON\'T THROW':
+                        ability_modifier = str_modifier
+                    elif answer == 'EXIT':
+                        return answer
+                else:
+                    ability_modifier = str_modifier
+
+            else:
+                for classifications in index['EQUIPMENT']['WEAPON'].values():
+                    for classification, items in classifications.items():
+                        for weapon_in_index in items.values():
+                            if weapon_in_index.name == weapon.name:
+                                if classification == 'MELEE':
+                                    ability_modifier = str_modifier
+                                else:  # classification == 'RANGED'
+                                    ability_modifier = dex_modifier
+                        if weapon in items.values():
+                            if classification == 'MELEE':
+                                ability_modifier = str_modifier
+                            elif classification == 'RANGED':
+                                ability_modifier = dex_modifier
+
+            if ability_modifier is None:
+                raise Exception('Value of ability_modifier is None!')
+
+            if config['ATTACK ALWAYS NO'] == 'FALSE':
+                answer = select(
+                    options=['YES', 'NO'],
+                    prompt='Besides the ability modifier and '
+                           'proficiency, is there any other modifier that'
+                           'you must add in this roll?',
+                    single_item=True,
+                    go_back=False,
+                )
+
+                if answer == 'YES':
+                    modifier = get_a_number(
+                        prompt='Type the modifier.',
+                        go_back_message=False
+                    )
+                elif answer == 'NO':
+                    modifier = 0
+                else:
+                    return answer
+
+                answer = select(
+                    options=['ADVANTAGE', 'DISADVANTAGE', 'NO'],
+                    prompt='Are you in advantage or disadvantage in this roll?',
+                    single_item=True,
+                    go_back=False,
+                )
+
+                if answer in ['ADVANTAGE', 'DISADVANTAGE']:
+                    loop = 2
+
+                    if answer == 'ADVANTAGE':
+                        choose_number = '>'
+                    else:  # answer == 'DISADVANTAGE'
+                        choose_number = '<'
+                elif answer == 'NO':
+                    loop = 1
+                    choose_number = None
+                else:
+                    return answer
+            else:
+                choose_number = None
+                modifier = 0
+                loop = 1
+
+            d20 = Dice()
+            d20_string = convert_dice_to_d_format(d20)
+            damage_dice = convert_dice_to_d_format(weapon.damage)[1:]
+
+            print(f'You selected {weapon.name.title()}')
+            print(f'Your attack is {d20_string}; The damage is a {damage_dice}')
+            print('Press ENTER to roll your attack...')
+            input()
+
+            damage_modifier = ability_modifier
+            attack_modifier = ability_modifier + proficiency + modifier
+
+            results = []
+            for _ in range(loop):
+                result = d20.roll()
+                results.append(result)
+
+            if choose_number:
+                print(f'You rolled: {results[0]} and {results[1]}!')
+                results.sort()
+
+                if choose_number == '>':
+                    result = results[1]
+                    print('Since you have ADVANTAGE, you get the bigger value.')
+                    print(f'Making your roll value of {result}')
+
+                else:  # choose_number == '<'
+                    result = results[0]
+                    print('Since you have DISADVANTAGE, '
+                          'you get the lowest value.')
+                    print(f'Making your roll value of {result}')
+
+            else:
+                result = results[0]
+                print(f'Your result is {result}...')
 
             if result == 20:
+                print('Which is a CRITICAL SUCCESS!')
                 weapon.damage.number = 2
-                damage = weapon.damage.roll()
-                weapon.damage.number = 1
-            else:
-                damage = weapon.damage.roll()
 
-        if 
+            elif result == 1:
+                print('Which is a failure regardless of any modifier!')
+                weapon.damage.number = 0
 
-        print(f'You selected {weapon.name.title()}')
-        print(f'Your attack is {d20_string}; The damage is {damage_dice}')
-        print('Press ENTER to roll your attack...')
-        input()
+            if result != 1:
+                result += attack_modifier
+                print(f'You have a modifier total of {attack_modifier}, making '
+                      f'your total attack of {result}!')
+            print('')
 
-        print(f'Your result is {result}...')
-        if result == 20:
-            print('Which is a CRITICAL!')
-        print(
-            f"If you succeed in your attack, you've done a damage of {damage}"
-        )
+            damage = weapon.damage.roll()
+            if damage > 0:
+                damage += damage_modifier
+                print(
+                    f"If you succeed in your attack, "
+                    f"you've done a damage of {damage}!"
+                )
 
-        print('Press ENTER to continue')
-        input()
-    elif weapon == 'GO BACK' or weapon == 'EXIT':
-        return weapon
+            print('Press ENTER to continue')
+            input()
+        elif weapon == 'GO BACK' or weapon == 'EXIT':
+            return weapon
 
 
+"""
 def skill_check(character):
     # TODO: Finish this function
 """
@@ -3941,6 +3988,7 @@ def play(character):
         'MODIFY EQUIPMENT',
         'MODIFY HP',
         'CAST A SPELL',
+        'PERFORM AN ATTACK',
         'ADD XP',
         'TAKE A REST',
         'DIE',
@@ -3989,6 +4037,12 @@ def play(character):
 
         elif answer == 'ADD XP':
             add_xp(character)
+
+        elif answer == 'PERFORM AN ATTACK':
+            result = weapon_attack(character)
+
+            if result == 'EXIT':
+                answer = 'GO BACK'
 
 
 def open_sheet(sheet):
@@ -4243,6 +4297,7 @@ def edit_configurations():
 
     possible_values = {
         'DICE ROLL': ['VIRTUAL', 'PHYSICAL'],
+        'ATTACK ALWAYS NO': ['TRUE', 'FALSE'],
     }
 
     selected = None
