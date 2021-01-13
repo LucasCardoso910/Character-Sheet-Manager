@@ -5,7 +5,9 @@ import copy
 
 config = {
     'DICE ROLL': 'VIRTUAL',
-    'ATTACK ALWAYS NO': 'FALSE',
+    'ROLLS ALWAYS': 'ASK',
+    'ATTACK ALWAYS': 'ASK',
+    'SKILL CHECK ALWAYS': 'ASK',
 }
 
 
@@ -3342,6 +3344,69 @@ def edit_character(character):
     return True
 
 
+def get_extra_modifier():
+    answer = select(
+        options=['YES', 'NO'],
+        prompt='Besides the ability modifier and '
+               'proficiency, is there any other modifier that'
+               'you must add in this roll?',
+        single_item=True,
+        go_back=False,
+    )
+
+    if answer == 'YES':
+        modifier = get_a_number(
+            prompt='Type the modifier.',
+            go_back_message=False
+        )
+    elif answer == 'NO':
+        modifier = 0
+    else:
+        return answer
+
+    return modifier
+
+
+def get_dis_advantage():
+    answer = select(
+        options=['ADVANTAGE', 'DISADVANTAGE', 'NO'],
+        prompt='Are you in advantage or disadvantage in this roll?',
+        single_item=True,
+        go_back=False,
+    )
+
+    if answer in ['ADVANTAGE', 'DISADVANTAGE']:
+        if answer == 'ADVANTAGE':
+            choose_number = '>'
+        else:  # answer == 'DISADVANTAGE'
+            choose_number = '<'
+    elif answer == 'NO':
+        choose_number = None
+    else:
+        return answer
+
+    return choose_number
+
+
+def get_info_about_roll(config_key, extra_modifier, dis_advantage):
+    choose_number = None
+    modifier = 0
+
+    if config[config_key] == 'ASK':
+
+        if extra_modifier is True:
+            modifier = get_extra_modifier()
+            if modifier == 'EXIT':
+                return modifier
+
+        if dis_advantage is True:
+            choose_number = get_dis_advantage()
+            if choose_number == 'EXIT':
+                return choose_number
+
+    return choose_number, modifier
+
+
 def weapon_attack(character):
     clear_terminal()
 
@@ -3362,6 +3427,11 @@ def weapon_attack(character):
         )
 
         if weapon != 'GO BACK' and weapon != 'EXIT':
+            original_damage_dice = Dice(
+                number=weapon.damage.number,
+                maximum=weapon.damage.max,
+            )
+
             ability_modifier = None
 
             if weapon.name in character.proficiencies['WEAPONS']:
@@ -3376,7 +3446,7 @@ def weapon_attack(character):
                     ability_modifier = str_modifier
 
             elif 'THROWN' in weapon.properties:
-                if config['ATTACK ALWAYS NO'] == 'FALSE':
+                if config['ATTACK ALWAYS'] == 'ASK':
                     answer = select(
                         options=['THROW', 'DON\'T THROW'],
                         prompt='This weapon can be thrown. Would you like to?',
@@ -3390,7 +3460,8 @@ def weapon_attack(character):
                         ability_modifier = str_modifier
                     elif answer == 'EXIT':
                         return answer
-                else:
+
+                else:  # config['ATTACK ALWAYS'] == 'NO'
                     ability_modifier = str_modifier
 
             else:
@@ -3402,62 +3473,20 @@ def weapon_attack(character):
                                     ability_modifier = str_modifier
                                 else:  # classification == 'RANGED'
                                     ability_modifier = dex_modifier
-                        if weapon in items.values():
-                            if classification == 'MELEE':
-                                ability_modifier = str_modifier
-                            elif classification == 'RANGED':
-                                ability_modifier = dex_modifier
 
             if ability_modifier is None:
                 raise Exception('Value of ability_modifier is None!')
 
-            if config['ATTACK ALWAYS NO'] == 'FALSE':
-                answer = select(
-                    options=['YES', 'NO'],
-                    prompt='Besides the ability modifier and '
-                           'proficiency, is there any other modifier that'
-                           'you must add in this roll?',
-                    single_item=True,
-                    go_back=False,
-                )
-
-                if answer == 'YES':
-                    modifier = get_a_number(
-                        prompt='Type the modifier.',
-                        go_back_message=False
-                    )
-                elif answer == 'NO':
-                    modifier = 0
-                else:
-                    return answer
-
-                answer = select(
-                    options=['ADVANTAGE', 'DISADVANTAGE', 'NO'],
-                    prompt='Are you in advantage or disadvantage in this roll?',
-                    single_item=True,
-                    go_back=False,
-                )
-
-                if answer in ['ADVANTAGE', 'DISADVANTAGE']:
-                    loop = 2
-
-                    if answer == 'ADVANTAGE':
-                        choose_number = '>'
-                    else:  # answer == 'DISADVANTAGE'
-                        choose_number = '<'
-                elif answer == 'NO':
-                    loop = 1
-                    choose_number = None
-                else:
-                    return answer
-            else:
-                choose_number = None
-                modifier = 0
-                loop = 1
+            choose_number, modifier = get_info_about_roll(
+                config_key='ATTACK ALWAYS',
+                extra_modifier=True,
+                dis_advantage=True
+            )
 
             d20 = Dice()
             d20_string = convert_dice_to_d_format(d20)
-            damage_dice = convert_dice_to_d_format(weapon.damage)[1:]
+            damage_dice = convert_dice_to_d_format(weapon.damage)
+            damage_dice = damage_dice[1:]
 
             print(f'You selected {weapon.name.title()}')
             print(f'Your attack is {d20_string}; The damage is a {damage_dice}')
@@ -3467,29 +3496,13 @@ def weapon_attack(character):
             damage_modifier = ability_modifier
             attack_modifier = ability_modifier + proficiency + modifier
 
-            results = []
-            for _ in range(loop):
-                result = d20.roll()
-                results.append(result)
-
             if choose_number:
-                print(f'You rolled: {results[0]} and {results[1]}!')
-                results.sort()
-
                 if choose_number == '>':
-                    result = results[1]
-                    print('Since you have ADVANTAGE, you get the bigger value.')
-                    print(f'Making your roll value of {result}')
-
+                    result = d20.roll(advantage=True)
                 else:  # choose_number == '<'
-                    result = results[0]
-                    print('Since you have DISADVANTAGE, '
-                          'you get the lowest value.')
-                    print(f'Making your roll value of {result}')
-
+                    result = d20.roll(disadvantage=True)
             else:
-                result = results[0]
-                print(f'Your result is {result}...')
+                result = d20.roll()
 
             if result == 20:
                 print('Which is a CRITICAL SUCCESS!')
@@ -3515,14 +3528,75 @@ def weapon_attack(character):
 
             print('Press ENTER to continue')
             input()
+
+            weapon.damage = original_damage_dice
+
         elif weapon == 'GO BACK' or weapon == 'EXIT':
             return weapon
 
 
-"""
 def skill_check(character):
-    # TODO: Finish this function
-"""
+    while True:
+        skill = select(
+            options=index['SKILLS'],
+            prompt='Select what skill you want to perform the check.',
+            show_type='key',
+            return_type='key',
+            single_item=True
+        )
+
+        if skill in ['EXIT', 'GO BACK']:
+            return skill
+        else:
+            choose_number, modifier = get_info_about_roll(
+                config_key='SKILL CHECK ALWAYS',
+                extra_modifier=False,
+                dis_advantage=True,
+            )
+
+            ability = index['SKILLS'][skill]
+            ability_modifier = character.abilities.score(ability)
+
+            proficiency = 0
+            if skill in character.proficiencies['SKILLS']:
+                proficiency = character.proficiencies['VALUE']
+
+            clear_terminal()
+            print(f'You have selected {skill}.')
+            print(f'{skill} is associated to {ability}.')
+            if proficiency:
+                print('You are proficient in this skill!')
+            print('')
+
+            print(f'Your ability modifier is {ability_modifier}.')
+            if proficiency:
+                print(f'Your proficiency is {proficiency}')
+            print('')
+
+            print('Press ENTER to roll your die...')
+            input()
+
+            d20 = Dice()
+
+            if choose_number == '>':
+                value = d20.roll(advantage=True)
+            elif choose_number == '<':
+                value = d20.roll(disadvantage=True)
+            else:  # No advantage, nor disadvantage
+                value = d20.roll()
+
+            total_modifier = ability_modifier + proficiency + modifier
+            total_value = total_modifier + value
+
+            print(f'You rolled {value}.')
+            print(
+                f'With a total modifier of {total_modifier}, '
+                f'you rolled {total_value}.'
+            )
+            print('')
+
+            print('Press ENTER to go back...')
+            input()
 
 
 def use_magic(character):
@@ -3988,10 +4062,10 @@ def play(character):
         'MODIFY EQUIPMENT',
         'MODIFY HP',
         'CAST A SPELL',
-        'PERFORM AN ATTACK',
+        'MAKE AN ATTACK',
+        'MAKE A SKILL CHECK',
         'ADD XP',
         'TAKE A REST',
-        'DIE',
     ]
 
     while answer != 'GO BACK':
@@ -4002,29 +4076,18 @@ def play(character):
             finish=False
         )
 
+        result = None
         if answer == 'EQUIP ARMOR':
             result = equip_armor(character)
-
-            if result == 'EXIT':
-                answer = 'GO BACK'
 
         elif answer == 'TAKE A REST':
             result = rest(character)
 
-            if result == 'EXIT':
-                answer = 'GO BACK'
-
         elif answer == 'MODIFY HP':
             result = modify_hp(character)
 
-            if result == 'EXIT':
-                answer = 'GO BACK'
-
         elif answer == 'MODIFY EQUIPMENT':
             result = modify_equipment(character)
-
-            if result == 'EXIT':
-                answer = 'GO BACK'
 
         elif answer == 'ROLL DICE':
             roll_dice()
@@ -4032,17 +4095,17 @@ def play(character):
         elif answer == 'CAST A SPELL':
             result = use_magic(character)
 
-            if result == 'EXIT':
-                answer = 'GO BACK'
-
         elif answer == 'ADD XP':
             add_xp(character)
 
-        elif answer == 'PERFORM AN ATTACK':
+        elif answer == 'MAKE AN ATTACK':
             result = weapon_attack(character)
 
-            if result == 'EXIT':
-                answer = 'GO BACK'
+        elif answer == 'MAKE A SKILL CHECK':
+            result = skill_check(character)
+
+        if result == 'EXIT':
+            answer = 'GO BACK'
 
 
 def open_sheet(sheet):
@@ -4135,6 +4198,10 @@ def get_config_value():
                 value = pickle.load(config_txt)
         else:
             raise Exception('File config.txt empty!')
+
+    for configuration, status in config.items():
+        if configuration not in value.keys():
+            value[configuration] = status
 
     return value
 
@@ -4297,7 +4364,9 @@ def edit_configurations():
 
     possible_values = {
         'DICE ROLL': ['VIRTUAL', 'PHYSICAL'],
-        'ATTACK ALWAYS NO': ['TRUE', 'FALSE'],
+        'ROLLS ALWAYS': ['NO', 'ASK'],
+        'ATTACK ALWAYS': ['NO', 'ASK'],
+        'SKILL CHECK ALWAYS': ['NO', 'ASK']
     }
 
     selected = None
@@ -4331,6 +4400,10 @@ def edit_configurations():
             if new_config == 'EXIT':
                 selected = 'EXIT'
             elif new_config != 'GO BACK':
+                if selected == 'ROLLS ALWAYS':
+                    config['ATTACK ALWAYS'] = new_config
+                    config['SKILL CHECK ALWAYS'] = new_config
+
                 config[selected] = new_config
 
     files_folder = check_files().joinpath('Files')
