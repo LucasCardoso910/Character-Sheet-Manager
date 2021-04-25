@@ -1,3 +1,7 @@
+WARNING: This code has not been worked on in a several time. It is unfinished
+and may be not working properly. I was working on a proper documentation before 
+stopping. I intend to go back to it one day. But not so soon. 
+
 # Character-Sheet-Manager
 An easy way to create D&D character sheets!
 
